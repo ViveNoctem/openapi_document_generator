@@ -27,3 +27,6 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+.idea
+open_api_spec_builder.iml

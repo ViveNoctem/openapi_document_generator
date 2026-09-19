@@ -1,0 +1,8 @@
+name: open_api_spec_builder_workspace
+environment:
+  sdk: '^3.11.0'
+
+workspace:
+  - packages/open_api_spec_builder
+  - packages/open_api_spec_builder_generator
+  - examples/dart_frog_example

@@ -1,0 +1,16 @@
+builders:
+  open_api_fragment_builder:
+    import: "package:open_api_spec_builder_generator/build.dart"
+    builder_factories: ["openapiFragmentBuilder"]
+    build_extensions: {".dart": [".tmp.openapi.json"]}
+    required_inputs: [".g.dart"]
+    auto_apply: dependents
+    build_to: source
+
+  open_api_combining_builder:
+    import: "package:open_api_spec_builder_generator/build.dart"
+    builder_factories: [ "openapiCombiningBuilder" ]
+    required_inputs: [".tmp.openapi.json", ".g.dart"]
+    build_extensions: {"$lib$": ["openapi.json"]}
+    auto_apply: dependents
+    build_to: source

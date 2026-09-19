@@ -1,0 +1,20 @@
+name: dart_frog_example
+description: A new Dart Frog application
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+resolution: workspace
+
+dependencies:
+  dart_frog: ^1.1.0
+  open_api_spec_builder:
+
+dev_dependencies:
+  build_runner: ^2.16.1
+  dart_frog_lint: ^0.1.0
+  mocktail: ^1.0.0
+  open_api_spec_builder_generator:
+  test: ^1.0.0
