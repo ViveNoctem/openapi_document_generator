@@ -20,8 +20,8 @@ final class const InternOpenApiEndpoint({
        );
 
   factory InternOpenApiEndpoint.fromJson(Map<String, dynamic> json) =>
-      _$OpenApiEndpointFromJson(json);
-  Map<String, dynamic> toJson() => _$OpenApiEndpointToJson(this);
+      _$InternOpenApiEndpointFromJson(json);
+  Map<String, dynamic> toJson() => _$InternOpenApiEndpointToJson(this);
 
   @override
   InternOpenApiEndpoint merge(ISpecNode other) {
@@ -71,6 +71,6 @@ final class const InternOpenApiEndpoint({
 @JsonSerializable()
 final class const InternOpenApiResponse({required final String description}) {
   factory InternOpenApiResponse.fromJson(Map<String, dynamic> json) =>
-      _$OpenApiResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$OpenApiResponseToJson(this);
+      _$InternOpenApiResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$InternOpenApiResponseToJson(this);
 }

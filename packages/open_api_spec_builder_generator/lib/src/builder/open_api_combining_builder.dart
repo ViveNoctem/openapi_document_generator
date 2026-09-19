@@ -1,13 +1,18 @@
 import 'dart:convert';
 
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:glob/glob.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/fragment/open_api_fragment.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/i_spec_node.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_spec.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
+import 'package:open_api_spec_builder_generator/src/utils/content.utils.dart';
 
-class OpenApiCombiningBuilder implements Builder {
+class const OpenApiCombiningBuilder({
+  final ContentUtils contentUtils = const ContentUtils(),
+}) implements Builder {
   @override
   final buildExtensions = const {
     r'$lib$': ['openapi.json'],
@@ -30,6 +35,7 @@ class OpenApiCombiningBuilder implements Builder {
     if (fragments.isEmpty) return;
 
     final OpenApiPaths openApiPaths = {};
+    final allTypes = <DartType>{};
 
     for (final fragment in fragments) {
       for (final MapEntry(:key, :value) in fragment.paths.entries) {
@@ -38,16 +44,48 @@ class OpenApiCombiningBuilder implements Builder {
           continue;
         }
 
+        for (final apiEndpoint in value.values) {
+          if (apiEndpoint.parameters case final parameters?) {
+            for (final parameter in parameters) {
+              if (parameter.schemaImportUri case final schemaType?) {
+                final schemaLibraryId = await AssetId.resolve(
+                  Uri.parse(schemaType.$1),
+                );
+                if (!await buildStep.resolver.isLibrary(schemaLibraryId)) {
+                  continue;
+                }
+
+                final libraryElement = await buildStep.resolver.libraryFor(
+                  schemaLibraryId,
+                );
+
+                final element = libraryElement.exportNamespace.get2(
+                  schemaType.$2,
+                );
+                if (element is InterfaceElement) {
+                  allTypes.add(element.thisType);
+                }
+
+                // TODO not good. need to set it to null. else it lands in the openapi.json
+                parameter.schemaImportUri = null;
+              }
+            }
+          }
+        }
+
         openApiPaths[key] = value;
       }
     }
 
     final info = OpenApiInfo(title: "title", version: "version");
 
+    final components = contentUtils.getSchemas(allTypes);
+
     final resultSpec = OpenApiSpec(
       info: info,
       paths: openApiPaths,
       openapi: .openApi320,
+      components: components,
     );
 
     final validation = resultSpec.validate("");

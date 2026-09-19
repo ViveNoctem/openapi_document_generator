@@ -161,7 +161,22 @@ class const AnnotationReader({
     final required = _readBool(openApiParameter, "required");
     final deprecated = _readBool(openApiParameter, "deprecated");
     final schemaType = _readType(openApiParameter, "schema");
-    final schema = contentUtil.getJsonForContentType(schemaType);
+    final schema = contentUtil.getJsonForContentType(
+      type: schemaType,
+      isComponents: false,
+    );
+    // TODO remove !
+    final (String, String)? schemaImportUri;
+
+    if (schemaType != null) {
+      schemaImportUri = (
+        schemaType.element!.library!.firstFragment.source.uri.toString(),
+        schemaType.element!.name!,
+      );
+    } else {
+      schemaImportUri = null;
+    }
+
     final content = _readString(openApiParameter, "content");
 
     return InternOpenApiParameter.withDefault(
@@ -171,8 +186,8 @@ class const AnnotationReader({
       required: required,
       description: description,
       content: content,
-      schemaType: schemaType,
-      schema: schema,
+      schemaImportUri: schemaImportUri,
+      schema: schema.$1,
     );
   }
 

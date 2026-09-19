@@ -14,16 +14,51 @@
         },
         "parameters": [
           {
-            "name": "HAHAHA",
+            "name": "temp",
             "in": "query",
-            "description": "asdasd",
+            "description": "description for the temp field",
             "required": false,
             "deprecated": false,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "$ref": "#/components/schemas/SomethingClass"
             }
           }
         ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SomethingClass": {
+        "type": "object",
+        "required": [
+          "a",
+          "d"
+        ],
+        "properties": {
+          "a": {
+            "type": "integer"
+          },
+          "d": {
+            "type": "object",
+            "$ref": "#/components/schemas/SomethingClass2"
+          },
+          "b": {
+            "type": "string"
+          }
+        }
+      },
+      "SomethingClass2": {
+        "type": "object",
+        "required": [
+          "c"
+        ],
+        "properties": {
+          "c": {
+            "type": "number"
+          }
+        }
       }
     }
   }

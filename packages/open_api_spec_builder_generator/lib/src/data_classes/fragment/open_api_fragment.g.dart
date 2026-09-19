@@ -14,7 +14,7 @@ OpenApiFragment _$OpenApiFragmentFromJson(Map<String, dynamic> json) =>
           (e as Map<String, dynamic>).map(
             (k, e) => MapEntry(
               $enumDecode(_$HttpMethodEnumMap, k),
-              OpenApiEndpoint.fromJson(e as Map<String, dynamic>),
+              InternOpenApiEndpoint.fromJson(e as Map<String, dynamic>),
             ),
           ),
         ),

@@ -15,10 +15,13 @@ OpenApiSpec _$OpenApiSpecFromJson(Map<String, dynamic> json) => OpenApiSpec(
       (e as Map<String, dynamic>).map(
         (k, e) => MapEntry(
           $enumDecode(_$HttpMethodEnumMap, k),
-          OpenApiEndpoint.fromJson(e as Map<String, dynamic>),
+          InternOpenApiEndpoint.fromJson(e as Map<String, dynamic>),
         ),
       ),
     ),
+  ),
+  components: OpenApiComponents.fromJson(
+    json['components'] as Map<String, dynamic>,
   ),
 );
 
@@ -30,6 +33,7 @@ Map<String, dynamic> _$OpenApiSpecToJson(OpenApiSpec instance) =>
         (k, e) =>
             MapEntry(k, e.map((k, e) => MapEntry(_$HttpMethodEnumMap[k]!, e))),
       ),
+      'components': instance.components,
     };
 
 const _$EOpenapiVersionEnumMap = {

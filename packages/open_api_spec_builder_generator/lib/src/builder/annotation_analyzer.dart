@@ -82,14 +82,21 @@ class const AnnotationAnalyzer({
           .getParameterChecker()
           .firstAnnotationOf(parameter, throwOnUnresolved: false);
 
-      final schema = contentUtil.getJsonForContentType(parameter.type);
+      final schema = contentUtil.getJsonForContentType(
+        type: parameter.type,
+        isComponents: false,
+      );
 
       final inferredValues = InternOpenApiParameter(
         name: parameter.displayName,
         location: null,
         required: parameter.isRequired,
-        schemaType: parameter.type,
-        schema: schema,
+        // TODO remove!
+        schemaImportUri: (
+          parameter.library!.firstFragment.source.uri.toString(),
+          parameter.type.element!.name!,
+        ),
+        schema: schema.$1,
         // deprecated:
         // description:
       );

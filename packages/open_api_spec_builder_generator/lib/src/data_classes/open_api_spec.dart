@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/i_spec_node.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_components.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_endpoint.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
 
@@ -15,6 +16,7 @@ final class OpenApiSpec({
   required final EOpenapiVersion openapi,
   required final OpenApiInfo info,
   required final OpenApiPaths paths,
+  required final OpenApiComponents components,
 }) implements ISpecNode {
   factory OpenApiSpec.fromJson(Map<String, dynamic> json) =>
       _$OpenApiSpecFromJson(json);

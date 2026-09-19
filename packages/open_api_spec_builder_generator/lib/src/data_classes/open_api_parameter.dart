@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/element/type.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:open_api_spec_builder/open_api_spec_builder.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/i_spec_node.dart';
@@ -8,7 +7,7 @@ import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
 part 'open_api_parameter.g.dart';
 
 @JsonSerializable()
-class const InternOpenApiParameter({
+class InternOpenApiParameter({
   final String? name,
   @JsonKey(
     name: "in",
@@ -19,8 +18,7 @@ class const InternOpenApiParameter({
   final String? description,
   final bool? required,
   final bool? deprecated,
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  final DartType? schemaType,
+  var (String, String)? schemaImportUri,
   @RawJsonStringConverter() final String? schema,
   final String? content,
   // TODO example
@@ -36,7 +34,7 @@ class const InternOpenApiParameter({
     String? description,
     bool? required,
     bool? deprecated,
-    DartType? schemaType,
+    (String, String)? schemaImportUri,
     String? schema,
     String? content,
   }) : this(
@@ -45,7 +43,7 @@ class const InternOpenApiParameter({
          required: required ?? false,
          description: description,
          name: name,
-         schemaType: schemaType,
+         schemaImportUri: schemaImportUri,
          schema: schema,
          content: content,
        );
@@ -57,20 +55,20 @@ class const InternOpenApiParameter({
     }
     final String? mergedContent;
 
-    if (schemaType != null) {
+    if (schema != null) {
       mergedContent = null;
     } else {
       mergedContent = content ?? other.content;
     }
 
-    final DartType? mergedSchemaType;
+    final (String, String)? mergedSchemaImportUri;
     final String? mergedSchema;
 
     if (content != null) {
-      mergedSchemaType = null;
+      mergedSchemaImportUri = null;
       mergedSchema = null;
     } else {
-      mergedSchemaType = schemaType ?? other.schemaType;
+      mergedSchemaImportUri = schemaImportUri ?? other.schemaImportUri;
       // TODO potentially merge both schema string
       mergedSchema = schema ?? other.schema;
     }
@@ -82,7 +80,7 @@ class const InternOpenApiParameter({
       deprecated: deprecated ?? other.deprecated,
       location: location ?? other.location,
       content: mergedContent,
-      schemaType: mergedSchemaType,
+      schemaImportUri: mergedSchemaImportUri,
       schema: mergedSchema,
     );
   }
@@ -156,8 +154,8 @@ class const InternOpenApiParameter({
   }
 
   factory InternOpenApiParameter.fromJson(Map<String, dynamic> json) =>
-      _$OpenApiParameterFromJson(json);
-  Map<String, dynamic> toJson() => _$OpenApiParameterToJson(this);
+      _$InternOpenApiParameterFromJson(json);
+  Map<String, dynamic> toJson() => _$InternOpenApiParameterToJson(this);
 }
 
 OpenApiParameterLocation? _externalEnumFromJson(String? json) =>

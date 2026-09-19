@@ -18,9 +18,20 @@ Response onRequest(
   @OpenapiParameter(
     description: 'description for the temp field',
     location: .query,
-    schema: String,
   )
-  int? temp,
+  SomethingClass? temp,
 ) {
   return Response(body: 'Welcome to Dart Frog!');
+}
+
+class const SomethingClass(
+  final int a,
+  final SomethingClass2 d, {
+  final String b = 'hallo',
+}) {}
+
+class SomethingClass2 {
+  final double c;
+
+  const SomethingClass2(this.c);
 }
