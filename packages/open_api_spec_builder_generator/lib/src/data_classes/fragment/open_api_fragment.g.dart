@@ -30,13 +30,13 @@ Map<String, dynamic> _$OpenApiFragmentToJson(OpenApiFragment instance) =>
     };
 
 const _$HttpMethodEnumMap = {
-  HttpMethod.get: 'GET',
-  HttpMethod.post: 'POST',
-  HttpMethod.put: 'PUT',
-  HttpMethod.delete: 'DELETE',
-  HttpMethod.options: 'OPTIONS',
-  HttpMethod.head: 'HEAD',
-  HttpMethod.patch: 'PATCH',
-  HttpMethod.trace: 'TRACE',
-  HttpMethod.query: 'QUERY',
+  HttpMethod.get: 'get',
+  HttpMethod.post: 'post',
+  HttpMethod.put: 'put',
+  HttpMethod.delete: 'delete',
+  HttpMethod.options: 'options',
+  HttpMethod.head: 'head',
+  HttpMethod.patch: 'patch',
+  HttpMethod.trace: 'trace',
+  HttpMethod.query: 'query',
 };

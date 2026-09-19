@@ -7,6 +7,7 @@ part of 'open_api_spec.dart';
 // **************************************************************************
 
 OpenApiSpec _$OpenApiSpecFromJson(Map<String, dynamic> json) => OpenApiSpec(
+  openapi: $enumDecode(_$EOpenapiVersionEnumMap, json['openapi']),
   info: OpenApiInfo.fromJson(json['info'] as Map<String, dynamic>),
   paths: (json['paths'] as Map<String, dynamic>).map(
     (k, e) => MapEntry(
@@ -19,35 +20,34 @@ OpenApiSpec _$OpenApiSpecFromJson(Map<String, dynamic> json) => OpenApiSpec(
       ),
     ),
   ),
-  openapi: $enumDecode(_$EOpenapiVersionEnumMap, json['openapi']),
 );
 
 Map<String, dynamic> _$OpenApiSpecToJson(OpenApiSpec instance) =>
     <String, dynamic>{
+      'openapi': _$EOpenapiVersionEnumMap[instance.openapi]!,
       'info': instance.info,
       'paths': instance.paths.map(
         (k, e) =>
             MapEntry(k, e.map((k, e) => MapEntry(_$HttpMethodEnumMap[k]!, e))),
       ),
-      'openapi': _$EOpenapiVersionEnumMap[instance.openapi]!,
     };
-
-const _$HttpMethodEnumMap = {
-  HttpMethod.get: 'GET',
-  HttpMethod.post: 'POST',
-  HttpMethod.put: 'PUT',
-  HttpMethod.delete: 'DELETE',
-  HttpMethod.options: 'OPTIONS',
-  HttpMethod.head: 'HEAD',
-  HttpMethod.patch: 'PATCH',
-  HttpMethod.trace: 'TRACE',
-  HttpMethod.query: 'QUERY',
-};
 
 const _$EOpenapiVersionEnumMap = {
   EOpenapiVersion.openApi300: '3.0.0',
   EOpenapiVersion.openApi310: '3.1.0',
   EOpenapiVersion.openApi320: '3.2.0',
+};
+
+const _$HttpMethodEnumMap = {
+  HttpMethod.get: 'get',
+  HttpMethod.post: 'post',
+  HttpMethod.put: 'put',
+  HttpMethod.delete: 'delete',
+  HttpMethod.options: 'options',
+  HttpMethod.head: 'head',
+  HttpMethod.patch: 'patch',
+  HttpMethod.trace: 'trace',
+  HttpMethod.query: 'query',
 };
 
 OpenApiInfo _$OpenApiInfoFromJson(Map<String, dynamic> json) => OpenApiInfo(

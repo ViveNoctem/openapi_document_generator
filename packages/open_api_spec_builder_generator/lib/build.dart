@@ -3,7 +3,7 @@ import 'package:open_api_spec_builder_generator/src/builder/open_api_combining_b
 import 'package:open_api_spec_builder_generator/src/builder/open_api_fragment_builder.dart';
 
 Builder openapiFragmentBuilder(BuilderOptions options) =>
-    OpenApiFragmentBuilder();
+    OpenApiFragmentBuilder(options: options);
 
 Builder openapiCombiningBuilder(BuilderOptions options) =>
     OpenApiCombiningBuilder();

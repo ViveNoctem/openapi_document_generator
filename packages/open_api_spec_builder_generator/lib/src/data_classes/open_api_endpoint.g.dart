@@ -8,18 +8,23 @@ part of 'open_api_endpoint.dart';
 
 OpenApiEndpoint _$OpenApiEndpointFromJson(Map<String, dynamic> json) =>
     OpenApiEndpoint(
-      responses: (json['responses'] as Map<String, dynamic>).map(
+      responses: (json['responses'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(
           int.parse(k),
           OpenApiResponse.fromJson(e as Map<String, dynamic>),
         ),
       ),
+      parameters: (json['parameters'] as List<dynamic>?)
+          ?.map((e) => OpenApiParameter.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
-Map<String, dynamic> _$OpenApiEndpointToJson(OpenApiEndpoint instance) =>
-    <String, dynamic>{
-      'responses': instance.responses.map((k, e) => MapEntry(k.toString(), e)),
-    };
+Map<String, dynamic> _$OpenApiEndpointToJson(
+  OpenApiEndpoint instance,
+) => <String, dynamic>{
+  'responses': ?instance.responses?.map((k, e) => MapEntry(k.toString(), e)),
+  'parameters': ?instance.parameters,
+};
 
 OpenApiResponse _$OpenApiResponseFromJson(Map<String, dynamic> json) =>
     OpenApiResponse(description: json['description'] as String);

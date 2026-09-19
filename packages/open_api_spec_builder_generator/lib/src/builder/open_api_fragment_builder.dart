@@ -1,18 +1,30 @@
 import 'dart:convert';
 
 import 'package:build/build.dart';
-import 'package:open_api_spec_builder_generator/src/builder/type_checkers.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/fragment/open_api_fragment.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_builder_options.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_fragment_context.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_spec.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
+import 'package:open_api_spec_builder_generator/src/utils/type_checkers.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'annotation_analyzer.dart';
 
-class OpenApiFragmentBuilder({
-  final TypeCheckers typeCheckers = const TypeCheckers(),
-  final AnnotationAnalyzer annotationAnalyzer = const AnnotationAnalyzer(),
-}) implements Builder {
+class OpenApiFragmentBuilder implements Builder {
+  final BuilderOptions options;
+  final TypeCheckers typeCheckers;
+  final AnnotationAnalyzer annotationAnalyzer;
+  late final OpenApiBuilderOptions builderOptions;
+
+  OpenApiFragmentBuilder({
+    required this.options,
+    this.typeCheckers = const TypeCheckers(),
+    this.annotationAnalyzer = const AnnotationAnalyzer(),
+  }) {
+    builderOptions = OpenApiBuilderOptions.fromJson(options.config);
+  }
+
   @override
   final buildExtensions = const {
     '.dart': ['.tmp.openapi.json'],
@@ -31,8 +43,8 @@ class OpenApiFragmentBuilder({
     final reader = LibraryReader(library);
 
     final typeChecker = typeCheckers.getEndpointChecker();
-
     final annotatedElements = reader.annotatedWith(typeChecker);
+    final context = OpenApiFragmentContext(options: builderOptions);
 
     if (annotatedElements.isEmpty) return;
 
@@ -40,22 +52,27 @@ class OpenApiFragmentBuilder({
 
     for (final annotatedElement in annotatedElements) {
       final fragmentPart = annotationAnalyzer.readEndpointMethod(
-        annotatedElement,
+        element: annotatedElement,
+        context: context,
       );
 
       switch (fragmentPart) {
-        case FailureOf<OpenApiPathEnty, void>():
+        case FailureOf<OpenApiPathEntry, void>():
           continue;
-        case SuccessOf<OpenApiPathEnty, void>():
+        case SuccessOf<OpenApiPathEntry, void>():
           break;
       }
 
-      if (paths.containsKey(fragmentPart.data.key)) {
-        // TODO Path already exists
+      final map = paths.putIfAbsent(fragmentPart.data.$1, () {
+        return {};
+      });
+
+      if (map.containsKey(fragmentPart.data.$2)) {
+        // TODO same path same method
         continue;
       }
 
-      paths[fragmentPart.data.key] = fragmentPart.data.value;
+      map[fragmentPart.data.$2] = fragmentPart.data.$3;
     }
 
     // Wenn wir keine validen Klassen gefunden haben, überspringen
