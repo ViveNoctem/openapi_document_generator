@@ -161,7 +161,7 @@ class const AnnotationReader({
     final required = _readBool(openApiParameter, "required");
     final deprecated = _readBool(openApiParameter, "deprecated");
     final schemaType = _readType(openApiParameter, "schema");
-    final schema = contentUtil.getJsonForContentType(
+    final schema = contentUtil.getOpenApiSchemaForType(
       type: schemaType,
       isComponents: false,
     );

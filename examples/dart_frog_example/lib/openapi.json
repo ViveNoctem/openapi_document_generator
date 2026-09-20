@@ -8,8 +8,14 @@
     "/": {
       "get": {
         "responses": {
+          "202": {
+            "description": "Description for accepted"
+          },
           "200": {
-            "description": "Description for OK"
+            "schema": {
+              "type": "object",
+              "$ref": "#/components/schemas/Response"
+            }
           }
         },
         "parameters": [
@@ -30,6 +36,14 @@
   },
   "components": {
     "schemas": {
+      "Response": {
+        "type": "object",
+        "properties": {
+          "shelfBufferOutputContextKey": {
+            "type": "string"
+          }
+        }
+      },
       "SomethingClass": {
         "type": "object",
         "required": [

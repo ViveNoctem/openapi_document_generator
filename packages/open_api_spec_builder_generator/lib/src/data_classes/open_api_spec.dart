@@ -10,6 +10,7 @@ part 'open_api_spec.g.dart';
 /// value Map of HttpMethods and their corresponding Endpoint description
 typedef OpenApiPaths = Map<String, Map<HttpMethod, InternOpenApiEndpoint>>;
 typedef OpenApiPathEntry = (String, HttpMethod, InternOpenApiEndpoint);
+typedef DartTypeJson = ({String uri, String className});
 
 @JsonSerializable()
 final class OpenApiSpec({

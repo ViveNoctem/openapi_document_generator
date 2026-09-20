@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/i_spec_node.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_content.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_parameter.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
 
@@ -28,6 +29,20 @@ final class const InternOpenApiEndpoint({
     if (other is! InternOpenApiEndpoint) {
       return this;
     }
+
+    // if both responses are non null merge the results
+    // status codes existing in other.responses and not in this.responses are added
+    if ((responses, other.responses) case (
+      final thisResponses?,
+      final otherResponses?,
+    ))
+      for (final MapEntry(:key, :value) in otherResponses.entries) {
+        if (thisResponses.containsKey(key)) {
+          continue;
+        }
+
+        thisResponses[key] = value;
+      }
 
     return InternOpenApiEndpoint(
       responses: responses ?? other.responses,
@@ -69,7 +84,34 @@ final class const InternOpenApiEndpoint({
 }
 
 @JsonSerializable()
-final class const InternOpenApiResponse({required final String description}) {
+final class const InternOpenApiResponse({
+  final String? description,
+  final OpenApiSchemaContent? schema,
+  final Map<String, OpenApiContent>? content,
+}) implements ISpecNode {
+  @override
+  ISpecNode merge(ISpecNode other) {
+    // TODO: implement merge
+    throw UnimplementedError();
+  }
+
+  @override
+  ResultOf<void, ValidationErrors> validate(String path) {
+    path = path + "/response";
+    if (description == null) {
+      return FailureOf(
+        ValidationErrors([
+          ValidationEntry(
+            path: path,
+            error: "description is required for all responses",
+          ),
+        ]),
+      );
+    }
+
+    return SuccessOf(null);
+  }
+
   factory InternOpenApiResponse.fromJson(Map<String, dynamic> json) =>
       _$InternOpenApiResponseFromJson(json);
   Map<String, dynamic> toJson() => _$InternOpenApiResponseToJson(this);

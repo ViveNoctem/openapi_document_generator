@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:analyzer/dart/element/element.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_content.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_endpoint.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_fragment_context.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_parameter.dart';
@@ -15,7 +18,7 @@ class const AnnotationAnalyzer({
   final TypeCheckers typeCheckers = const TypeCheckers(),
   final ContentUtils contentUtil = const ContentUtils(),
 }) {
-  ResultOf<OpenApiPathEntry, void> readEndpointMethod({
+  ResultOf<(OpenApiPathEntry, Set<DartTypeJson>), void> readEndpointMethod({
     required AnnotatedElement element,
     required OpenApiFragmentContext context,
   }) {
@@ -24,16 +27,17 @@ class const AnnotationAnalyzer({
       return FailureOf(null);
     }
 
-    final openApiEndpoint = annotationReader.readOpenApiEndpoints(
-      element.annotation,
-    );
+    final openApiEndpoint = _readPathEntry(element: element);
+    var dartTypes = <DartTypeJson>{};
 
     switch (openApiEndpoint) {
-      case FailureOf<(String, HttpMethod, InternOpenApiEndpoint), void>():
+      case FailureOf<(OpenApiPathEntry, Set<DartTypeJson>), void>():
         return FailureOf(null);
-      case SuccessOf<(String, HttpMethod, InternOpenApiEndpoint), void>():
+      case SuccessOf<(OpenApiPathEntry, Set<DartTypeJson>), void>():
         break;
     }
+
+    dartTypes.addAll(openApiEndpoint.data.$2);
 
     final parameters = _readParameters(
       context: context,
@@ -43,22 +47,85 @@ class const AnnotationAnalyzer({
     InternOpenApiEndpoint subvalue;
 
     switch (parameters) {
-      case FailureOf<List<InternOpenApiParameter>, void>():
-        subvalue = openApiEndpoint.data.$3;
-      case SuccessOf<List<InternOpenApiParameter>, void>():
-        subvalue = openApiEndpoint.data.$3.merge(
-          InternOpenApiEndpoint(parameters: parameters.data),
+      case FailureOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
+        subvalue = openApiEndpoint.data.$1.$3;
+      case SuccessOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
+        subvalue = openApiEndpoint.data.$1.$3.merge(
+          InternOpenApiEndpoint(parameters: parameters.data.$1),
         );
+        dartTypes.addAll(parameters.data.$2);
     }
 
     return SuccessOf((
-      openApiEndpoint.data.$1,
-      openApiEndpoint.data.$2,
-      subvalue,
+      (openApiEndpoint.data.$1.$1, openApiEndpoint.data.$1.$2, subvalue),
+      dartTypes,
     ));
   }
 
-  ResultOf<List<InternOpenApiParameter>, void> _readParameters({
+  ResultOf<(OpenApiPathEntry, Set<DartTypeJson>), void> _readPathEntry({
+    required AnnotatedElement element,
+  }) {
+    final annotationEndpoint = annotationReader.readOpenApiEndpoints(
+      element.annotation,
+    );
+
+    switch (annotationEndpoint) {
+      case FailureOf<(String, HttpMethod, InternOpenApiEndpoint), void>():
+        return FailureOf(null);
+      case SuccessOf<(String, HttpMethod, InternOpenApiEndpoint), void>():
+        break;
+    }
+
+    final inferredEndpoint = _getInferredEndpoint(element: element.element);
+
+    switch (inferredEndpoint) {
+      case FailureOf<InternOpenApiEndpoint, void>():
+        return FailureOf(null);
+      case SuccessOf<InternOpenApiEndpoint, void>():
+        break;
+    }
+
+    final dartTypes = <DartTypeJson>{};
+
+    final result = annotationEndpoint.data.$3.merge(inferredEndpoint.data);
+
+    if (result.responses?.values case final values?) {
+      for (final response in values) {
+        dartTypes.addAll(_readDarTypesFromContent(response.schema));
+      }
+    }
+
+    return SuccessOf((
+      (annotationEndpoint.data.$1, annotationEndpoint.data.$2, result),
+      dartTypes,
+    ));
+  }
+
+  ResultOf<InternOpenApiEndpoint, void> _getInferredEndpoint({
+    required Element element,
+  }) {
+    if (element is! FunctionTypedElement) {
+      return FailureOf(null);
+    }
+
+    final returnType = element.returnType;
+
+    final schemaResult = contentUtil.getOpenApiSchemaForType(
+      type: returnType,
+      isComponents: false,
+    );
+
+    final InternOpenApiEndpoint inferredEndpoint = InternOpenApiEndpoint(
+      responses: {
+        HttpStatus.ok: InternOpenApiResponse(schema: schemaResult.$1),
+      },
+    );
+
+    return SuccessOf(inferredEndpoint);
+  }
+
+  ResultOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>
+  _readParameters({
     required OpenApiFragmentContext context,
     required Element element,
   }) {
@@ -67,6 +134,7 @@ class const AnnotationAnalyzer({
     }
 
     final result = <InternOpenApiParameter>[];
+    final componentSchemas = <DartTypeJson>{};
 
     for (final parameter in element.formalParameters) {
       if (context.options.apiLibrary == .dartFrog) {
@@ -82,7 +150,7 @@ class const AnnotationAnalyzer({
           .getParameterChecker()
           .firstAnnotationOf(parameter, throwOnUnresolved: false);
 
-      final schema = contentUtil.getJsonForContentType(
+      final schema = contentUtil.getOpenApiSchemaForType(
         type: parameter.type,
         isComponents: false,
       );
@@ -91,11 +159,6 @@ class const AnnotationAnalyzer({
         name: parameter.displayName,
         location: null,
         required: parameter.isRequired,
-        // TODO remove!
-        schemaImportUri: (
-          parameter.library!.firstFragment.source.uri.toString(),
-          parameter.type.element!.name!,
-        ),
         schema: schema.$1,
         // deprecated:
         // description:
@@ -112,9 +175,52 @@ class const AnnotationAnalyzer({
 
       final merged = annotationValues.merge(inferredValues);
 
+      componentSchemas.addAll(_readDarTypesFromContent(merged.schema));
+
       result.add(merged);
     }
 
-    return SuccessOf(result);
+    return SuccessOf((result, componentSchemas));
+  }
+
+  Set<DartTypeJson> _readDarTypesFromContent(OpenApiSchemaContent? schema) {
+    final result = <DartTypeJson>{};
+    if (schema case OpenApiSchemaContent(
+      dartType: final schemaType,
+      type: .object,
+    )) {
+      // add dartType of schema to components
+      if (schemaType?.element case Element(
+        library: final library?,
+        name: final name?,
+      )) {
+        result.add((
+          uri: library.firstFragment.source.uri.toString(),
+          className: name,
+        ));
+      }
+
+      // add dartTypes of properties to components
+      if (schema.properties?.values case final values?) {
+        for (final value in values) {
+          if (value case OpenApiSchemaContent(
+            dartType: final propertyType,
+            type: .object,
+          )) {
+            if (propertyType?.element case Element(
+              library: final library?,
+              name: final name?,
+            )) {
+              result.add((
+                uri: library.firstFragment.source.uri.toString(),
+                className: name,
+              ));
+            }
+          }
+        }
+      }
+    }
+
+    return result;
   }
 }

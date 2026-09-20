@@ -19,6 +19,9 @@ OpenApiFragment _$OpenApiFragmentFromJson(Map<String, dynamic> json) =>
           ),
         ),
       ),
+      components: OpenApiComponentsFragment.fromJson(
+        json['components'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$OpenApiFragmentToJson(OpenApiFragment instance) =>
@@ -27,6 +30,7 @@ Map<String, dynamic> _$OpenApiFragmentToJson(OpenApiFragment instance) =>
         (k, e) =>
             MapEntry(k, e.map((k, e) => MapEntry(_$HttpMethodEnumMap[k]!, e))),
       ),
+      'components': instance.components,
     };
 
 const _$HttpMethodEnumMap = {

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/fragment/open_api_fragment.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_builder_options.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_components_fragment.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_fragment_context.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_spec.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
@@ -49,6 +50,9 @@ class OpenApiFragmentBuilder implements Builder {
     if (annotatedElements.isEmpty) return;
 
     final OpenApiPaths paths = {};
+    final OpenApiComponentsFragment components = OpenApiComponentsFragment(
+      schemas: {},
+    );
 
     for (final annotatedElement in annotatedElements) {
       final fragmentPart = annotationAnalyzer.readEndpointMethod(
@@ -57,13 +61,13 @@ class OpenApiFragmentBuilder implements Builder {
       );
 
       switch (fragmentPart) {
-        case FailureOf<OpenApiPathEntry, void>():
+        case FailureOf<(OpenApiPathEntry, Set<DartTypeJson>), void>():
           continue;
-        case SuccessOf<OpenApiPathEntry, void>():
+        case SuccessOf<(OpenApiPathEntry, Set<DartTypeJson>), void>():
           break;
       }
 
-      final map = paths.putIfAbsent(fragmentPart.data.$1, () {
+      final map = paths.putIfAbsent(fragmentPart.data.$1.$1, () {
         return {};
       });
 
@@ -72,13 +76,15 @@ class OpenApiFragmentBuilder implements Builder {
         continue;
       }
 
-      map[fragmentPart.data.$2] = fragmentPart.data.$3;
+      components.schemas.addAll(fragmentPart.data.$2);
+
+      map[fragmentPart.data.$1.$2] = fragmentPart.data.$1.$3;
     }
 
     // Wenn wir keine validen Klassen gefunden haben, überspringen
     if (paths.isEmpty) return;
 
-    final result = OpenApiFragment(paths: paths);
+    final result = OpenApiFragment(paths: paths, components: components);
 
     // 5. JSON als Datei schreiben
     final outputId = buildStep.inputId.changeExtension('.tmp.openapi.json');

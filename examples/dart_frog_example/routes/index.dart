@@ -5,9 +5,8 @@ import 'package:open_api_spec_builder/open_api_spec_builder.dart';
 
 @OpenapiEndpoint(
   responses: {
-    HttpStatus.ok: OpenapiResponse(
-      statusCode: HttpStatus.ok,
-      description: 'Description for OK',
+    HttpStatus.accepted: OpenapiResponse(
+      description: 'Description for accepted',
     ),
   },
   path: '/',

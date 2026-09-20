@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:open_api_spec_builder/open_api_spec_builder.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/i_spec_node.dart';
-import 'package:open_api_spec_builder_generator/src/json/raw_json_converter.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_content.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
 
 part 'open_api_parameter.g.dart';
@@ -18,8 +18,7 @@ class InternOpenApiParameter({
   final String? description,
   final bool? required,
   final bool? deprecated,
-  var (String, String)? schemaImportUri,
-  @RawJsonStringConverter() final String? schema,
+  final OpenApiSchemaContent? schema,
   final String? content,
   // TODO example
 }) implements ISpecNode {
@@ -35,7 +34,7 @@ class InternOpenApiParameter({
     bool? required,
     bool? deprecated,
     (String, String)? schemaImportUri,
-    String? schema,
+    OpenApiSchemaContent? schema,
     String? content,
   }) : this(
          location: location,
@@ -43,7 +42,6 @@ class InternOpenApiParameter({
          required: required ?? false,
          description: description,
          name: name,
-         schemaImportUri: schemaImportUri,
          schema: schema,
          content: content,
        );
@@ -60,15 +58,11 @@ class InternOpenApiParameter({
     } else {
       mergedContent = content ?? other.content;
     }
-
-    final (String, String)? mergedSchemaImportUri;
-    final String? mergedSchema;
+    final OpenApiSchemaContent? mergedSchema;
 
     if (content != null) {
-      mergedSchemaImportUri = null;
       mergedSchema = null;
     } else {
-      mergedSchemaImportUri = schemaImportUri ?? other.schemaImportUri;
       // TODO potentially merge both schema string
       mergedSchema = schema ?? other.schema;
     }
@@ -80,7 +74,6 @@ class InternOpenApiParameter({
       deprecated: deprecated ?? other.deprecated,
       location: location ?? other.location,
       content: mergedContent,
-      schemaImportUri: mergedSchemaImportUri,
       schema: mergedSchema,
     );
   }

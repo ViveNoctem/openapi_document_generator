@@ -38,39 +38,30 @@ class const OpenApiCombiningBuilder({
     final allTypes = <DartType>{};
 
     for (final fragment in fragments) {
+      for (final fragmentSchema in fragment.components.schemas) {
+        final schemaLibraryId = await AssetId.resolve(
+          Uri.parse(fragmentSchema.uri),
+        );
+        if (!await buildStep.resolver.isLibrary(schemaLibraryId)) {
+          continue;
+        }
+
+        final libraryElement = await buildStep.resolver.libraryFor(
+          schemaLibraryId,
+        );
+
+        final element = libraryElement.exportNamespace.get2(
+          fragmentSchema.className,
+        );
+        if (element is InterfaceElement) {
+          allTypes.add(element.thisType);
+        }
+      }
+
       for (final MapEntry(:key, :value) in fragment.paths.entries) {
         if (openApiPaths.containsKey(key)) {
           // TODO Path exists multiple times
           continue;
-        }
-
-        for (final apiEndpoint in value.values) {
-          if (apiEndpoint.parameters case final parameters?) {
-            for (final parameter in parameters) {
-              if (parameter.schemaImportUri case final schemaType?) {
-                final schemaLibraryId = await AssetId.resolve(
-                  Uri.parse(schemaType.$1),
-                );
-                if (!await buildStep.resolver.isLibrary(schemaLibraryId)) {
-                  continue;
-                }
-
-                final libraryElement = await buildStep.resolver.libraryFor(
-                  schemaLibraryId,
-                );
-
-                final element = libraryElement.exportNamespace.get2(
-                  schemaType.$2,
-                );
-                if (element is InterfaceElement) {
-                  allTypes.add(element.thisType);
-                }
-
-                // TODO not good. need to set it to null. else it lands in the openapi.json
-                parameter.schemaImportUri = null;
-              }
-            }
-          }
         }
 
         openApiPaths[key] = value;

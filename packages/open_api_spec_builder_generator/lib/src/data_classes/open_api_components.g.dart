@@ -8,10 +8,13 @@ part of 'open_api_components.dart';
 
 OpenApiComponents _$OpenApiComponentsFromJson(Map<String, dynamic> json) =>
     OpenApiComponents(
-      schemas: const RawJsonStringConverter().fromJson(json['schemas']),
+      schemas: (json['schemas'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          k,
+          OpenApiSchemaContent.fromJson(e as Map<String, dynamic>),
+        ),
+      ),
     );
 
 Map<String, dynamic> _$OpenApiComponentsToJson(OpenApiComponents instance) =>
-    <String, dynamic>{
-      'schemas': ?const RawJsonStringConverter().toJson(instance.schemas),
-    };
+    <String, dynamic>{'schemas': ?instance.schemas};

@@ -29,8 +29,20 @@ Map<String, dynamic> _$InternOpenApiEndpointToJson(
 
 InternOpenApiResponse _$InternOpenApiResponseFromJson(
   Map<String, dynamic> json,
-) => InternOpenApiResponse(description: json['description'] as String);
+) => InternOpenApiResponse(
+  description: json['description'] as String?,
+  schema: json['schema'] == null
+      ? null
+      : OpenApiSchemaContent.fromJson(json['schema'] as Map<String, dynamic>),
+  content: (json['content'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, OpenApiContent.fromJson(e as Map<String, dynamic>)),
+  ),
+);
 
 Map<String, dynamic> _$InternOpenApiResponseToJson(
   InternOpenApiResponse instance,
-) => <String, dynamic>{'description': instance.description};
+) => <String, dynamic>{
+  'description': ?instance.description,
+  'schema': ?instance.schema,
+  'content': ?instance.content,
+};

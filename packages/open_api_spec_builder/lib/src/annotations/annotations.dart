@@ -20,7 +20,6 @@ class const OpenapiEndpoint({
 }
 
 class const OpenapiResponse({
-  required final int statusCode,
   // TODO required as long as i can't autogen it from comments
   required final String? description,
   final Type? resultType,

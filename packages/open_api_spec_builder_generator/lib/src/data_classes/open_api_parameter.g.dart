@@ -14,11 +14,9 @@ InternOpenApiParameter _$InternOpenApiParameterFromJson(
   description: json['description'] as String?,
   required: json['required'] as bool?,
   deprecated: json['deprecated'] as bool?,
-  schemaImportUri: _$recordConvertNullable(
-    json['schemaImportUri'],
-    ($jsonValue) => ($jsonValue[r'$1'] as String, $jsonValue[r'$2'] as String),
-  ),
-  schema: const RawJsonStringConverter().fromJson(json['schema']),
+  schema: json['schema'] == null
+      ? null
+      : OpenApiSchemaContent.fromJson(json['schema'] as Map<String, dynamic>),
   content: json['content'] as String?,
 );
 
@@ -30,17 +28,6 @@ Map<String, dynamic> _$InternOpenApiParameterToJson(
   'description': ?instance.description,
   'required': ?instance.required,
   'deprecated': ?instance.deprecated,
-  'schemaImportUri': ?instance.schemaImportUri == null
-      ? null
-      : <String, dynamic>{
-          r'$1': instance.schemaImportUri!.$1,
-          r'$2': instance.schemaImportUri!.$2,
-        },
-  'schema': ?const RawJsonStringConverter().toJson(instance.schema),
+  'schema': ?instance.schema,
   'content': ?instance.content,
 };
-
-$Rec? _$recordConvertNullable<$Rec>(
-  Object? value,
-  $Rec Function(Map) convert,
-) => value == null ? null : convert(value as Map<String, dynamic>);

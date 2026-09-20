@@ -1,11 +1,10 @@
-import 'dart:convert';
-
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_components.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_content.dart';
 
 class const ContentUtils() {
-  (String?, Set<DartType>?) getJsonForContentType({
+  (OpenApiSchemaContent?, Set<DartType>?) getOpenApiSchemaForType({
     required DartType? type,
     required bool isComponents,
   }) {
@@ -13,42 +12,47 @@ class const ContentUtils() {
       return (null, null);
     }
     final addedObjectTypes = <DartType>{};
-    final json = <String, dynamic>{};
+    OpenApiSchemaContent? contentResult = null;
 
     if (type.isDartCoreBool) {
       if (isComponents) {
         return (null, null);
       }
-      json["type"] = "boolean";
+      contentResult = OpenApiSchemaContent(type: .boolean);
     } else if (type.isDartCoreInt) {
       if (isComponents) {
         return (null, null);
       }
-      json["type"] = "integer";
+      contentResult = OpenApiSchemaContent(type: .integer);
     } else if (type.isDartCoreString) {
       if (isComponents) {
         return (null, null);
       }
-      json["type"] = "string";
+      contentResult = OpenApiSchemaContent(type: .string);
     } else if (type.isDartCoreDouble) {
       if (isComponents) {
         return (null, null);
       }
-      json["type"] = "number";
+      contentResult = OpenApiSchemaContent(type: .number);
     } else if (type.isDartCoreNull) {
       if (isComponents) {
         return (null, null);
       }
-      json["type"] = "null";
+      contentResult = OpenApiSchemaContent(type: .nullVal);
     } else if (type.isDartCoreList) {
       throw UnimplementedError("List as a parameter Type not supported");
+      contentResult = OpenApiSchemaContent(type: .array);
     } else {
       if (isComponents == false) {
-        json["type"] = "object";
-        json["\$ref"] = "#/components/schemas/${type.element?.displayName}";
-        addedObjectTypes.add(type);
+        if (type.element?.name case final name?) {
+          contentResult = OpenApiSchemaContent(
+            type: .object,
+            ref: "#/components/schemas/$name",
+            dartType: type,
+          );
+          addedObjectTypes.add(type);
+        }
       } else {
-        json["type"] = "object";
         // TODO required
         if (type.element case InterfaceElement interfaceElement) {
           final constructor = interfaceElement.constructors.firstOrNull;
@@ -67,7 +71,7 @@ class const ContentUtils() {
           }
 
           // TODO property Name to propertyJsonString
-          final propertiesJson = <String, dynamic>{};
+          final propertiesMap = <String, OpenApiSchemaContent>{};
 
           for (final superType in [
             interfaceElement.thisType,
@@ -92,7 +96,7 @@ class const ContentUtils() {
               }
 
               // TODO have to know if field is another dartType, that has to be generated
-              final (objectJson, newDartTypes) = getJsonForContentType(
+              final (objectJson, newDartTypes) = getOpenApiSchemaForType(
                 type: field.type,
                 isComponents: false,
               );
@@ -105,28 +109,29 @@ class const ContentUtils() {
                 addedObjectTypes.addAll(newDartTypes);
               }
 
-              propertiesJson[fieldName] = jsonDecode(objectJson);
+              propertiesMap[fieldName] = objectJson;
             }
           }
-          if (required.isNotEmpty) {
-            json["required"] = required;
-          }
-          if (propertiesJson.isNotEmpty) {
-            json["properties"] = propertiesJson;
-          }
+
+          contentResult = OpenApiSchemaContent(
+            type: .object,
+            required: required.isNotEmpty ? required : null,
+            properties: propertiesMap.isNotEmpty ? propertiesMap : null,
+            dartType: type,
+          );
         } else {
           throw UnimplementedError("object is not a InterfaceElement");
         }
       }
     }
 
-    return (jsonEncode(json), addedObjectTypes);
+    return (contentResult, addedObjectTypes);
   }
 
   OpenApiComponents getSchemas(Set<DartType> types) {
     final typesDone = <DartType>{};
     final toBeDone = <DartType>[...types];
-    var typesJson = <String, dynamic>{};
+    final schemaContentMap = <String, OpenApiSchemaContent>{};
 
     while (toBeDone.isNotEmpty) {
       final current = toBeDone.removeAt(0);
@@ -137,12 +142,15 @@ class const ContentUtils() {
 
       typesDone.add(current);
 
-      final (json, newTypes) = getJsonForContentType(
+      final (openApiSchema, newTypes) = getOpenApiSchemaForType(
         type: current,
         isComponents: true,
       );
-      if (json != null) {
-        typesJson[current.element!.name!] = jsonDecode(json);
+      if ((openApiSchema, current.element?.name) case (
+        final safeSchema?,
+        final safeName?,
+      )) {
+        schemaContentMap[safeName] = safeSchema;
       }
       if (newTypes != null) {
         for (final newType in newTypes) {
@@ -153,6 +161,6 @@ class const ContentUtils() {
       }
     }
 
-    return OpenApiComponents(types: typesDone, schemas: jsonEncode(typesJson));
+    return OpenApiComponents(types: typesDone, schemas: schemaContentMap);
   }
 }
