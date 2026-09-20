@@ -8,7 +8,15 @@ abstract interface class ISpecNode {
 class const ValidationEntry({
   required final String path,
   required final String error,
-}) {}
+  final ValidationErrorType type = .unknown,
+}) {
+  ValidationEntry.isRequired({required String path, required String fieldName})
+    : this(
+        path: path + "/$fieldName",
+        error: 'Field "$fieldName" is required',
+        type: .required,
+      );
+}
 
 class const ValidationErrors(final List<ValidationEntry> validations)
     implements ISpecNode {
@@ -26,3 +34,5 @@ class const ValidationErrors(final List<ValidationEntry> validations)
     throw UnimplementedError();
   }
 }
+
+enum ValidationErrorType { required, expectedUri, malformedField, unknown }

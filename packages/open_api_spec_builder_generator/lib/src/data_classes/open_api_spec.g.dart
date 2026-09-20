@@ -6,34 +6,36 @@ part of 'open_api_spec.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OpenApiSpec _$OpenApiSpecFromJson(Map<String, dynamic> json) => OpenApiSpec(
-  openapi: $enumDecode(_$EOpenapiVersionEnumMap, json['openapi']),
-  info: OpenApiInfo.fromJson(json['info'] as Map<String, dynamic>),
-  paths: (json['paths'] as Map<String, dynamic>).map(
+OpenapiSpec _$OpenapiSpecFromJson(Map<String, dynamic> json) => OpenapiSpec(
+  openapi: $enumDecodeNullable(_$EOpenapiVersionEnumMap, json['openapi']),
+  info: json['info'] == null
+      ? null
+      : OpenapiInfo.fromJson(json['info'] as Map<String, dynamic>),
+  paths: (json['paths'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(
       k,
       (e as Map<String, dynamic>).map(
         (k, e) => MapEntry(
           $enumDecode(_$HttpMethodEnumMap, k),
-          InternOpenApiEndpoint.fromJson(e as Map<String, dynamic>),
+          InternOpenApiOperation.fromJson(e as Map<String, dynamic>),
         ),
       ),
     ),
   ),
-  components: OpenApiComponents.fromJson(
-    json['components'] as Map<String, dynamic>,
-  ),
+  components: json['components'] == null
+      ? null
+      : OpenApiComponents.fromJson(json['components'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$OpenApiSpecToJson(OpenApiSpec instance) =>
+Map<String, dynamic> _$OpenapiSpecToJson(OpenapiSpec instance) =>
     <String, dynamic>{
-      'openapi': _$EOpenapiVersionEnumMap[instance.openapi]!,
-      'info': instance.info,
-      'paths': instance.paths.map(
+      'openapi': ?_$EOpenapiVersionEnumMap[instance.openapi],
+      'info': ?instance.info,
+      'paths': ?instance.paths?.map(
         (k, e) =>
             MapEntry(k, e.map((k, e) => MapEntry(_$HttpMethodEnumMap[k]!, e))),
       ),
-      'components': instance.components,
+      'components': ?instance.components,
     };
 
 const _$EOpenapiVersionEnumMap = {
@@ -54,10 +56,10 @@ const _$HttpMethodEnumMap = {
   HttpMethod.query: 'query',
 };
 
-OpenApiInfo _$OpenApiInfoFromJson(Map<String, dynamic> json) => OpenApiInfo(
-  title: json['title'] as String,
-  version: json['version'] as String,
+OpenapiInfo _$OpenapiInfoFromJson(Map<String, dynamic> json) => OpenapiInfo(
+  title: json['title'] as String?,
+  version: json['version'] as String?,
 );
 
-Map<String, dynamic> _$OpenApiInfoToJson(OpenApiInfo instance) =>
-    <String, dynamic>{'title': instance.title, 'version': instance.version};
+Map<String, dynamic> _$OpenapiInfoToJson(OpenapiInfo instance) =>
+    <String, dynamic>{'title': ?instance.title, 'version': ?instance.version};

@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'open_api_endpoint.dart';
+part of 'open_api_operation.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-InternOpenApiEndpoint _$InternOpenApiEndpointFromJson(
+InternOpenApiOperation _$InternOpenApiOperationFromJson(
   Map<String, dynamic> json,
-) => InternOpenApiEndpoint(
+) => InternOpenApiOperation(
   responses: (json['responses'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(
       int.parse(k),
@@ -20,8 +20,8 @@ InternOpenApiEndpoint _$InternOpenApiEndpointFromJson(
       .toList(),
 );
 
-Map<String, dynamic> _$InternOpenApiEndpointToJson(
-  InternOpenApiEndpoint instance,
+Map<String, dynamic> _$InternOpenApiOperationToJson(
+  InternOpenApiOperation instance,
 ) => <String, dynamic>{
   'responses': ?instance.responses?.map((k, e) => MapEntry(k.toString(), e)),
   'parameters': ?instance.parameters,
@@ -31,11 +31,8 @@ InternOpenApiResponse _$InternOpenApiResponseFromJson(
   Map<String, dynamic> json,
 ) => InternOpenApiResponse(
   description: json['description'] as String?,
-  schema: json['schema'] == null
-      ? null
-      : OpenApiSchemaContent.fromJson(json['schema'] as Map<String, dynamic>),
   content: (json['content'] as Map<String, dynamic>?)?.map(
-    (k, e) => MapEntry(k, OpenApiContent.fromJson(e as Map<String, dynamic>)),
+    (k, e) => MapEntry(k, OpenapiMediaType.fromJson(e as Map<String, dynamic>)),
   ),
 );
 
@@ -43,6 +40,5 @@ Map<String, dynamic> _$InternOpenApiResponseToJson(
   InternOpenApiResponse instance,
 ) => <String, dynamic>{
   'description': ?instance.description,
-  'schema': ?instance.schema,
   'content': ?instance.content,
 };

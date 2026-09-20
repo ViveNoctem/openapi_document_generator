@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'package:open_api_spec_builder/open_api_spec_builder.dart';
-import 'package:open_api_spec_builder_generator/src/data_classes/open_api_endpoint.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_operation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_parameter.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_spec.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
@@ -85,7 +85,7 @@ class const AnnotationReader({
       return FailureOf(null);
     }
 
-    final apiEndpoint = InternOpenApiEndpoint(responses: responses.data);
+    final apiEndpoint = InternOpenApiOperation(responses: responses.data);
 
     return SuccessOf((path.stringValue, enumHttpMethod, apiEndpoint));
   }

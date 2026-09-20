@@ -45,11 +45,15 @@ const _$OpenApiSchemaTypeEnumMap = {
   OpenApiSchemaType.array: 'array',
 };
 
-OpenApiContent _$OpenApiContentFromJson(Map<String, dynamic> json) =>
-    OpenApiContent(
-      OpenApiSchemaContent.fromJson(json['schema'] as Map<String, dynamic>),
-      json['example'],
+OpenapiMediaType _$OpenapiMediaTypeFromJson(Map<String, dynamic> json) =>
+    OpenapiMediaType(
+      schema: json['schema'] == null
+          ? null
+          : OpenApiSchemaContent.fromJson(
+              json['schema'] as Map<String, dynamic>,
+            ),
+      example: json['example'],
     );
 
-Map<String, dynamic> _$OpenApiContentToJson(OpenApiContent instance) =>
-    <String, dynamic>{'schema': instance.schema, 'example': ?instance.example};
+Map<String, dynamic> _$OpenapiMediaTypeToJson(OpenapiMediaType instance) =>
+    <String, dynamic>{'schema': ?instance.schema, 'example': ?instance.example};

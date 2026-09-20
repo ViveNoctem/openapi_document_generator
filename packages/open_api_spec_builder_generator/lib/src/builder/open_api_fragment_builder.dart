@@ -24,6 +24,7 @@ class OpenApiFragmentBuilder implements Builder {
     this.annotationAnalyzer = const AnnotationAnalyzer(),
   }) {
     builderOptions = OpenApiBuilderOptions.fromJson(options.config);
+    builderContext = BuilderContext(apiLibrary: builderOptions.apiLibrary);
   }
 
   @override

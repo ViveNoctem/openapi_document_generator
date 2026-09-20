@@ -12,9 +12,13 @@
             "description": "Description for accepted"
           },
           "200": {
-            "schema": {
-              "type": "object",
-              "$ref": "#/components/schemas/Response"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Response"
+                }
+              }
             }
           }
         },

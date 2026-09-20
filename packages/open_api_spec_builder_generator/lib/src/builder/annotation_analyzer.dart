@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_content.dart';
-import 'package:open_api_spec_builder_generator/src/data_classes/open_api_endpoint.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_fragment_context.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_operation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_parameter.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_spec.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
@@ -44,14 +44,14 @@ class const AnnotationAnalyzer({
       element: element.element,
     );
 
-    InternOpenApiEndpoint subvalue;
+    InternOpenApiOperation subvalue;
 
     switch (parameters) {
       case FailureOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
         subvalue = openApiEndpoint.data.$1.$3;
       case SuccessOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
         subvalue = openApiEndpoint.data.$1.$3.merge(
-          InternOpenApiEndpoint(parameters: parameters.data.$1),
+          InternOpenApiOperation(parameters: parameters.data.$1),
         );
         dartTypes.addAll(parameters.data.$2);
     }
@@ -70,18 +70,18 @@ class const AnnotationAnalyzer({
     );
 
     switch (annotationEndpoint) {
-      case FailureOf<(String, HttpMethod, InternOpenApiEndpoint), void>():
+      case FailureOf<(String, HttpMethod, InternOpenApiOperation), void>():
         return FailureOf(null);
-      case SuccessOf<(String, HttpMethod, InternOpenApiEndpoint), void>():
+      case SuccessOf<(String, HttpMethod, InternOpenApiOperation), void>():
         break;
     }
 
     final inferredEndpoint = _getInferredEndpoint(element: element.element);
 
     switch (inferredEndpoint) {
-      case FailureOf<InternOpenApiEndpoint, void>():
+      case FailureOf<InternOpenApiOperation, void>():
         return FailureOf(null);
-      case SuccessOf<InternOpenApiEndpoint, void>():
+      case SuccessOf<InternOpenApiOperation, void>():
         break;
     }
 
@@ -91,7 +91,10 @@ class const AnnotationAnalyzer({
 
     if (result.responses?.values case final values?) {
       for (final response in values) {
-        dartTypes.addAll(_readDarTypesFromContent(response.schema));
+        for (final mediaType
+            in response.content?.values ?? <OpenapiMediaType>[]) {
+          dartTypes.addAll(_readDarTypesFromContent(mediaType.schema));
+        }
       }
     }
 
@@ -101,7 +104,7 @@ class const AnnotationAnalyzer({
     ));
   }
 
-  ResultOf<InternOpenApiEndpoint, void> _getInferredEndpoint({
+  ResultOf<InternOpenApiOperation, void> _getInferredEndpoint({
     required Element element,
   }) {
     if (element is! FunctionTypedElement) {
@@ -115,13 +118,21 @@ class const AnnotationAnalyzer({
       isComponents: false,
     );
 
-    final InternOpenApiEndpoint inferredEndpoint = InternOpenApiEndpoint(
-      responses: {
-        HttpStatus.ok: InternOpenApiResponse(schema: schemaResult.$1),
-      },
-    );
+    if (schemaResult.$1 != null) {
+      final InternOpenApiOperation inferredEndpoint = InternOpenApiOperation(
+        responses: {
+          HttpStatus.ok: InternOpenApiResponse(
+            content: {
+              "application/json": OpenapiMediaType(schema: schemaResult.$1),
+            },
+          ),
+        },
+      );
 
-    return SuccessOf(inferredEndpoint);
+      return SuccessOf(inferredEndpoint);
+    }
+
+    return SuccessOf(InternOpenApiOperation());
   }
 
   ResultOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>

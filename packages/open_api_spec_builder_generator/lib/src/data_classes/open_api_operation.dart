@@ -1,18 +1,20 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/i_spec_node.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_content.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_fragment_context.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_parameter.dart';
 import 'package:open_api_spec_builder_generator/src/result/result_of.dart';
+import 'package:pub_semver/pub_semver.dart';
 
-part 'open_api_endpoint.g.dart';
+part 'open_api_operation.g.dart';
 
 // TODO This class should probably not have the path und httpMethod
 @JsonSerializable()
-final class const InternOpenApiEndpoint({
+final class const InternOpenApiOperation({
   final Map<int, InternOpenApiResponse>? responses,
   final List<InternOpenApiParameter>? parameters,
 }) implements ISpecNode {
-  InternOpenApiEndpoint.withDefault({
+  InternOpenApiOperation.withDefault({
     Map<int, InternOpenApiResponse>? responses,
     List<InternOpenApiParameter>? parameters,
   }) : this(
@@ -20,13 +22,13 @@ final class const InternOpenApiEndpoint({
          parameters: parameters ?? const [],
        );
 
-  factory InternOpenApiEndpoint.fromJson(Map<String, dynamic> json) =>
-      _$InternOpenApiEndpointFromJson(json);
-  Map<String, dynamic> toJson() => _$InternOpenApiEndpointToJson(this);
+  factory InternOpenApiOperation.fromJson(Map<String, dynamic> json) =>
+      _$InternOpenApiOperationFromJson(json);
+  Map<String, dynamic> toJson() => _$InternOpenApiOperationToJson(this);
 
   @override
-  InternOpenApiEndpoint merge(ISpecNode other) {
-    if (other is! InternOpenApiEndpoint) {
+  InternOpenApiOperation merge(ISpecNode other) {
+    if (other is! InternOpenApiOperation) {
       return this;
     }
 
@@ -44,7 +46,7 @@ final class const InternOpenApiEndpoint({
         thisResponses[key] = value;
       }
 
-    return InternOpenApiEndpoint(
+    return InternOpenApiOperation(
       responses: responses ?? other.responses,
       parameters: parameters ?? other.parameters,
     );
@@ -52,14 +54,18 @@ final class const InternOpenApiEndpoint({
 
   @override
   ResultOf<void, ValidationErrors> validate(String path) {
-    path = path + "/endpoint";
+    path = path + "/operation";
     final localResponse = responses;
 
     var validationErrors = ValidationErrors([]);
 
-    if (localResponse == null || localResponse.isEmpty) {
+    if (localResponse != null && localResponse.isEmpty) {
       validationErrors.validations.add(
-        ValidationEntry(path: path, error: "field 'responses' can't be empty"),
+        ValidationEntry(
+          path: path + "/responses",
+          error: '"responses" should contain at least one response',
+          type: .required,
+        ),
       );
     }
 
@@ -75,6 +81,16 @@ final class const InternOpenApiEndpoint({
       }
     }
 
+    if (responses case final notNull?) {
+      for (final response in notNull.values) {
+        final responseValidation = response.validate(path);
+
+        if (responseValidation case FailureOf<void, ValidationErrors>()) {
+          validationErrors = validationErrors.merge(responseValidation.failure);
+        }
+      }
+    }
+
     if (validationErrors.validations.isNotEmpty) {
       return FailureOf(validationErrors);
     }
@@ -86,8 +102,7 @@ final class const InternOpenApiEndpoint({
 @JsonSerializable()
 final class const InternOpenApiResponse({
   final String? description,
-  final OpenApiSchemaContent? schema,
-  final Map<String, OpenApiContent>? content,
+  final Map<String, OpenapiMediaType>? content,
 }) implements ISpecNode {
   @override
   ISpecNode merge(ISpecNode other) {
@@ -98,13 +113,12 @@ final class const InternOpenApiResponse({
   @override
   ResultOf<void, ValidationErrors> validate(String path) {
     path = path + "/response";
-    if (description == null) {
+
+    if (description == null &&
+        builderContext.openapiVersion < Version(3, 2, 0)) {
       return FailureOf(
         ValidationErrors([
-          ValidationEntry(
-            path: path,
-            error: "description is required for all responses",
-          ),
+          ValidationEntry.isRequired(path: path, fieldName: "description"),
         ]),
       );
     }

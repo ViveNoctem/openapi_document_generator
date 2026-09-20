@@ -25,8 +25,27 @@ class const OpenApiSchemaContent({
 
   @override
   ResultOf<void, ValidationErrors> validate(String path) {
-    // TODO: implement validate
-    throw UnimplementedError();
+    path = path + "/schema";
+    var errors = ValidationErrors([]);
+
+    if (properties?.values case final notNull?) {
+      for (final schema in notNull) {
+        final schemaResult = schema.validate(path);
+
+        switch (schemaResult) {
+          case FailureOf<void, ValidationErrors>():
+            errors = errors.merge(schemaResult.failure);
+          case SuccessOf<void, ValidationErrors>():
+            break;
+        }
+      }
+    }
+
+    if (errors.validations.isNotEmpty) {
+      return FailureOf(errors);
+    }
+
+    return SuccessOf(null);
   }
 
   factory OpenApiSchemaContent.fromJson(Map<String, dynamic> json) =>
@@ -35,13 +54,40 @@ class const OpenApiSchemaContent({
 }
 
 @JsonSerializable()
-class const OpenApiContent(
-  final OpenApiSchemaContent schema,
+class const OpenapiMediaType({
+  final OpenApiSchemaContent? schema,
   final dynamic example,
-) {
-  factory OpenApiContent.fromJson(Map<String, dynamic> json) =>
-      _$OpenApiContentFromJson(json);
-  Map<String, dynamic> toJson() => _$OpenApiContentToJson(this);
+}) implements ISpecNode {
+  factory OpenapiMediaType.fromJson(Map<String, dynamic> json) =>
+      _$OpenapiMediaTypeFromJson(json);
+  Map<String, dynamic> toJson() => _$OpenapiMediaTypeToJson(this);
+
+  @override
+  ISpecNode merge(ISpecNode other) {
+    // TODO: implement merge
+    throw UnimplementedError();
+  }
+
+  @override
+  ResultOf<void, ValidationErrors> validate(String path) {
+    path = path + "/mediatype";
+    var errors = ValidationErrors([]);
+    if (schema case final notNull?) {
+      final schemaResult = notNull.validate(path);
+
+      switch (schemaResult) {
+        case FailureOf<void, ValidationErrors>():
+          errors = errors.merge(schemaResult.failure);
+        case SuccessOf<void, ValidationErrors>():
+      }
+    }
+
+    if (errors.validations.isNotEmpty) {
+      return FailureOf(errors);
+    }
+
+    return SuccessOf(null);
+  }
 }
 
 // TODO snake_case to

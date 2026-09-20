@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_components_fragment.dart';
-import 'package:open_api_spec_builder_generator/src/data_classes/open_api_endpoint.dart';
+import 'package:open_api_spec_builder_generator/src/data_classes/open_api_operation.dart';
 import 'package:open_api_spec_builder_generator/src/data_classes/open_api_spec.dart';
 
 part 'open_api_fragment.g.dart';

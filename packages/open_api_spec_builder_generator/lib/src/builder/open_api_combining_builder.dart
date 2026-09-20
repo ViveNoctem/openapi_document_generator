@@ -68,11 +68,11 @@ class const OpenApiCombiningBuilder({
       }
     }
 
-    final info = OpenApiInfo(title: "title", version: "version");
+    final info = OpenapiInfo(title: "title", version: "version");
 
     final components = contentUtils.getSchemas(allTypes);
 
-    final resultSpec = OpenApiSpec(
+    final resultSpec = OpenapiSpec(
       info: info,
       paths: openApiPaths,
       openapi: .openApi320,
