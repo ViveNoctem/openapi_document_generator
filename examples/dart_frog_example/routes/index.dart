@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
-import 'package:open_api_spec_builder/open_api_spec_builder.dart';
+import 'package:openapi_document_annotation/openapi_document_annotation.dart';
 
 @OpenapiEndpoint(
   responses: {

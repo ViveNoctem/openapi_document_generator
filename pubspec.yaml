@@ -1,8 +1,8 @@
-name: open_api_spec_builder_workspace
+name: openapi_document_generator_workspace
 environment:
   sdk: '^3.11.0'
 
 workspace:
-  - packages/open_api_spec_builder
-  - packages/open_api_spec_builder_generator
+  - packages/openapi_document_annotation
+  - packages/openapi_document_generator
   - examples/dart_frog_example

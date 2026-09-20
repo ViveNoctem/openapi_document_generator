@@ -5,6 +5,6 @@ targets:
       - $package$
       - lib/$lib$
     builders:
-      open_api_spec_builder_generator|open_api_fragment_builder:
+      openapi_document_generator|openapi_fragment_builder:
         options:
           apiLibrary: "dartFrog"

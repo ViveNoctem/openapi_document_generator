@@ -29,4 +29,4 @@ doc/api/
 .flutter-plugins-dependencies
 
 .idea
-open_api_spec_builder.iml
+openapi_document_generator.iml
