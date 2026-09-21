@@ -6,3 +6,5 @@ workspace:
   - packages/openapi_document_annotation
   - packages/openapi_document_generator
   - examples/dart_frog_example
+  - examples/shelf_router_example
+  - examples/shelf_router_generator_example

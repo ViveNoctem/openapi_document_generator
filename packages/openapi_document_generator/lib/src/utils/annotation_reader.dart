@@ -1,8 +1,9 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'package:openapi_document_annotation/openapi_document_annotation.dart';
+import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_parameter.dart';
-import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_controller.dart';
 import 'package:openapi_document_generator/src/result/result_of.dart';
 import 'package:openapi_document_generator/src/utils/content.utils.dart';
 import 'package:openapi_document_generator/src/utils/type_checkers.dart';
@@ -22,6 +23,14 @@ class const AnnotationReader({
     }
 
     return field.stringValue;
+  }
+
+  ConstantReader? _readObject(ConstantReader reader, String fieldName) {
+    final field = reader.peek(fieldName);
+
+    if (field == null || field.isNull) return null;
+
+    return ConstantReader(field.objectValue);
   }
 
   bool? _readBool(ConstantReader reader, String fieldName) {
@@ -209,5 +218,28 @@ class const AnnotationReader({
     return OpenApiParameterLocation.fromValue(enumValue.stringValue);
   }
 
+  // endregion
+
+  // region Controller
+  InternOpenapiController readOpenApiController(ConstantReader reader) {
+    final summary = _readString(reader, "summary");
+    final basePath = _readString(reader, "basePath");
+    final shelfRouter = _readObject(reader, "shelfRouter");
+    final responses = _readOpenApiEndpointResponses(reader);
+    final Map<int, InternOpenApiResponse>? responseValue;
+    switch (responses) {
+      case FailureOf<Map<int, InternOpenApiResponse>, void>():
+        responseValue = null;
+      case SuccessOf<Map<int, InternOpenApiResponse>, void>():
+        responseValue = responses.data;
+    }
+
+    return InternOpenapiController(
+      summary: summary,
+      basePath: basePath,
+      responses: responseValue,
+      shelfRouter: shelfRouter,
+    );
+  }
   // endregion
 }

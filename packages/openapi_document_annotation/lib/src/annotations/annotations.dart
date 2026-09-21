@@ -1,14 +1,16 @@
-class AOpenapiController {
-  //TODO baseRoute
-  final String? summary;
+class const OpenapiController({
+  final String? summary,
+  final Map<int, OpenapiResponse>? responses,
+  final String? basePath,
 
-  // TODO added to all endpoints in controller
-  final List<OpenapiResponse> responses;
+  /// Function or Variable returning the router for this controller.
+  ///
+  /// Only used if the shelf extension is activated
+  /// All added routes will use [basePath]
+  final Object? shelfRouter,
+}) {}
 
-  const AOpenapiController({this.summary, this.responses = const []});
-}
-
-const openapiController = AOpenapiController();
+const openapiController = OpenapiController();
 
 class const OpenapiEndpoint({
   required final Map<int, OpenapiResponse> responses,

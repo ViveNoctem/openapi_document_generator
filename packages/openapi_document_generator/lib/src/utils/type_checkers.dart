@@ -1,10 +1,10 @@
 import 'package:openapi_document_annotation/openapi_document_annotation.dart'
-    show OpenapiEndpoint, AOpenapiController, OpenapiParameter;
+    show OpenapiEndpoint, OpenapiController, OpenapiParameter;
 import 'package:source_gen/source_gen.dart';
 
 class const TypeCheckers() {
   final TypeChecker _openapiController = const TypeChecker.typeNamed(
-    AOpenapiController,
+    OpenapiController,
     inPackage: "openapi_document_annotation",
   );
 
