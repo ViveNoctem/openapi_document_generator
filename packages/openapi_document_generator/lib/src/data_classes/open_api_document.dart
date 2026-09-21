@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:openapi_document_generator/src/data_classes/i_document_node.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_components.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_path_item.dart';
 import 'package:openapi_document_generator/src/result/result_of.dart';
 
 part 'open_api_document.g.dart';
@@ -10,8 +11,8 @@ part 'open_api_document.g.dart';
 /// value Map of HttpMethods and their corresponding Endpoint description
 /// TODO Map<httpMethod, InternOpenApiEndpoint is wrong it should be a separate  PathItemObject
 /// TODO see https://spec.openapis.org/oas/v3.2.0.html#path-item-object;
-typedef OpenApiPaths = Map<String, Map<HttpMethod, InternOpenApiOperation>>;
-typedef OpenApiPathEntry = (String, HttpMethod, InternOpenApiOperation);
+typedef OpenApiPaths = Map<String, InternOpenapiPathItem>;
+typedef OpenApiPathEntry = MapEntry<String, InternOpenapiPathItem>;
 typedef DartTypeJson = ({String uri, String className});
 
 @JsonSerializable()
@@ -81,14 +82,13 @@ final class const OpenapiDocument({
           );
         }
 
-        for (final MapEntry(key: method, value: endpoint) in value.entries) {
-          localPath = localPath + method.value;
+        final pathItemResult = value.validate(localPath);
 
-          final endpointValidation = endpoint.validate(localPath);
-
-          if (endpointValidation case FailureOf<void, ValidationErrors>()) {
-            errors = errors.merge(endpointValidation.failure);
-          }
+        switch (pathItemResult) {
+          case FailureOf<void, ValidationErrors>():
+            errors.merge(pathItemResult.failure);
+          case SuccessOf<void, ValidationErrors>():
+            break;
         }
       }
     }

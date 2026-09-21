@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_components_fragment.dart';
-import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_path_item.dart';
 
 part 'open_api_fragment.g.dart';
 

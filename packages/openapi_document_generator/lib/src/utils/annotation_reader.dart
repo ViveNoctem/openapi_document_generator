@@ -4,6 +4,7 @@ import 'package:openapi_document_generator/src/data_classes/open_api_document.da
 import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_parameter.dart';
 import 'package:openapi_document_generator/src/data_classes/openapi_controller.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_path_item.dart';
 import 'package:openapi_document_generator/src/result/result_of.dart';
 import 'package:openapi_document_generator/src/utils/content.utils.dart';
 import 'package:openapi_document_generator/src/utils/type_checkers.dart';
@@ -94,9 +95,21 @@ class const AnnotationReader({
       return FailureOf(null);
     }
 
-    final apiEndpoint = InternOpenApiOperation(responses: responses.data);
+    final apiOperation = InternOpenApiOperation(responses: responses.data);
 
-    return SuccessOf((path.stringValue, enumHttpMethod, apiEndpoint));
+    InternOpenapiPathItem item = switch (enumHttpMethod) {
+      HttpMethod.get => InternOpenapiPathItem(get: apiOperation),
+      HttpMethod.post => InternOpenapiPathItem(post: apiOperation),
+      HttpMethod.put => InternOpenapiPathItem(put: apiOperation),
+      HttpMethod.delete => InternOpenapiPathItem(delete: apiOperation),
+      HttpMethod.options => InternOpenapiPathItem(options: apiOperation),
+      HttpMethod.head => InternOpenapiPathItem(head: apiOperation),
+      HttpMethod.patch => InternOpenapiPathItem(patch: apiOperation),
+      HttpMethod.trace => InternOpenapiPathItem(trace: apiOperation),
+      HttpMethod.query => InternOpenapiPathItem(query: apiOperation),
+    };
+
+    return SuccessOf(MapEntry(path.stringValue, item));
   }
 
   ResultOf<Map<int, InternOpenApiResponse>, void> _readOpenApiEndpointResponses(

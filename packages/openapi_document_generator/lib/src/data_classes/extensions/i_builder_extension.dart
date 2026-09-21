@@ -1,6 +1,9 @@
+import 'package:analyzer/dart/element/element.dart';
+import 'package:build/build.dart';
 import 'package:openapi_document_annotation/openapi_document_annotation.dart';
 import 'package:openapi_document_generator/src/data_classes/fragment/open_api_fragment.dart';
-import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_controller.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_partial_result.dart';
 import 'package:openapi_document_generator/src/result/result_of.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -17,15 +20,15 @@ abstract interface class IBuilderExtension {
   ///
   /// [partialResult] contains everything the builder knows so far about each [OpenapiEndpointElement]
   /// can be used to infer information not possible otherwise
-  ResultOf<OpenApiFragment, String> getExtensionFragment({
-    required Map<OpenapiControllerElement?, List<OpenapiEndpointElement>>
+  Future<ResultOf<OpenApiFragment, String>> getExtensionFragment({
+    required Map<
+      ClassElement?,
+      (List<OpenapiEndpointElement>, InternOpenapiController?)
+    >
     controllerEndpointMap,
-    required Map<OpenapiEndpointElement, OpenApiPathEntry> partialResult,
+    required Map<OpenapiEndpointElement, OpenapiPartialResult> partialResult,
+    required BuildStep buildStep,
   });
 }
 
-extension type OpenapiControllerElement(final AnnotatedElement element)
-    implements AnnotatedElement {}
-
-extension type OpenapiEndpointElement(final AnnotatedElement element)
-    implements AnnotatedElement {}
+extension type OpenapiEndpointElement(final AnnotatedElement element) {}

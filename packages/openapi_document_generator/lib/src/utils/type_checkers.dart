@@ -43,4 +43,14 @@ class const TypeCheckers() {
   }
 
   //endregion
+
+  // region dartShelf
+
+  final TypeChecker _dartShelfRouter = const TypeChecker.fromUrl(
+    "package:shelf_router/src/router.dart#Router",
+  );
+
+  TypeChecker getDartShelfRouter() {
+    return _dartShelfRouter;
+  }
 }

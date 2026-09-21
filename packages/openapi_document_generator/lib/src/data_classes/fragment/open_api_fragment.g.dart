@@ -11,12 +11,7 @@ OpenApiFragment _$OpenApiFragmentFromJson(Map<String, dynamic> json) =>
       paths: (json['paths'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(
           k,
-          (e as Map<String, dynamic>).map(
-            (k, e) => MapEntry(
-              $enumDecode(_$HttpMethodEnumMap, k),
-              InternOpenApiOperation.fromJson(e as Map<String, dynamic>),
-            ),
-          ),
+          InternOpenapiPathItem.fromJson(e as Map<String, dynamic>),
         ),
       ),
       components: OpenApiComponentsFragment.fromJson(
@@ -26,21 +21,6 @@ OpenApiFragment _$OpenApiFragmentFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$OpenApiFragmentToJson(OpenApiFragment instance) =>
     <String, dynamic>{
-      'paths': instance.paths.map(
-        (k, e) =>
-            MapEntry(k, e.map((k, e) => MapEntry(_$HttpMethodEnumMap[k]!, e))),
-      ),
+      'paths': instance.paths,
       'components': instance.components,
     };
-
-const _$HttpMethodEnumMap = {
-  HttpMethod.get: 'get',
-  HttpMethod.post: 'post',
-  HttpMethod.put: 'put',
-  HttpMethod.delete: 'delete',
-  HttpMethod.options: 'options',
-  HttpMethod.head: 'head',
-  HttpMethod.patch: 'patch',
-  HttpMethod.trace: 'trace',
-  HttpMethod.query: 'query',
-};

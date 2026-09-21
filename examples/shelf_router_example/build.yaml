@@ -1,0 +1,10 @@
+targets:
+  $default:
+    sources:
+      - bin/**
+      - $package$
+      - lib/$lib$
+    builders:
+      openapi_document_generator|openapi_fragment_builder:
+        options:
+          apiLibrary: "shelf"

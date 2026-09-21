@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_content.dart';
+import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_fragment_context.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_parameter.dart';
-import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
 import 'package:openapi_document_generator/src/result/result_of.dart';
 import 'package:openapi_document_generator/src/utils/annotation_reader.dart';
 import 'package:openapi_document_generator/src/utils/content.utils.dart';
@@ -39,27 +39,25 @@ class const AnnotationAnalyzer({
 
     dartTypes.addAll(openApiEndpoint.data.$2);
 
-    final parameters = _readParameters(
-      context: context,
-      element: element.element,
-    );
+    // TODO move inferred parameter to own loop
+    // final parameters = _readInferredParameters(
+    //   context: context,
+    //   element: element.element,
+    // );
+    //
+    // InternOpenApiOperation subvalue;
+    //
+    // switch (parameters) {
+    //   case FailureOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
+    //     subvalue = openApiEndpoint.data.$1.$3;
+    //   case SuccessOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
+    //     subvalue = openApiEndpoint.data.$1.$3.merge(
+    //       InternOpenApiOperation(parameters: parameters.data.$1),
+    //     );
+    //     dartTypes.addAll(parameters.data.$2);
+    // }
 
-    InternOpenApiOperation subvalue;
-
-    switch (parameters) {
-      case FailureOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
-        subvalue = openApiEndpoint.data.$1.$3;
-      case SuccessOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>():
-        subvalue = openApiEndpoint.data.$1.$3.merge(
-          InternOpenApiOperation(parameters: parameters.data.$1),
-        );
-        dartTypes.addAll(parameters.data.$2);
-    }
-
-    return SuccessOf((
-      (openApiEndpoint.data.$1.$1, openApiEndpoint.data.$1.$2, subvalue),
-      dartTypes,
-    ));
+    return SuccessOf(((openApiEndpoint.data.$1), dartTypes));
   }
 
   ResultOf<(OpenApiPathEntry, Set<DartTypeJson>), void> _readPathEntry({
@@ -70,38 +68,40 @@ class const AnnotationAnalyzer({
     );
 
     switch (annotationEndpoint) {
-      case FailureOf<(String, HttpMethod, InternOpenApiOperation), void>():
+      case FailureOf<OpenApiPathEntry, void>():
         return FailureOf(null);
-      case SuccessOf<(String, HttpMethod, InternOpenApiOperation), void>():
+      case SuccessOf<OpenApiPathEntry, void>():
         break;
     }
 
-    final inferredEndpoint = _getInferredEndpoint(element: element.element);
-
-    switch (inferredEndpoint) {
-      case FailureOf<InternOpenApiOperation, void>():
-        return FailureOf(null);
-      case SuccessOf<InternOpenApiOperation, void>():
-        break;
-    }
+    // TODO move inferredOperation to own loop
+    // final inferredEndpoint = _getInferredEndpoint(element: element.element);
+    //
+    // switch (inferredEndpoint) {
+    //   case FailureOf<InternOpenApiOperation, void>():
+    //     return FailureOf(null);
+    //   case SuccessOf<InternOpenApiOperation, void>():
+    //     break;
+    // }
 
     final dartTypes = <DartTypeJson>{};
 
-    final result = annotationEndpoint.data.$3.merge(inferredEndpoint.data);
+    final result =
+        annotationEndpoint; //.data.value.merge(inferredEndpoint.data);
 
-    if (result.responses?.values case final values?) {
-      for (final response in values) {
-        for (final mediaType
-            in response.content?.values ?? <OpenapiMediaType>[]) {
-          dartTypes.addAll(_readDarTypesFromContent(mediaType.schema));
+    final allOperations = result.data.value.allOperations;
+    for (final operation in allOperations) {
+      if (operation.responses?.values case final values?) {
+        for (final response in values) {
+          for (final mediaType
+              in response.content?.values ?? <OpenapiMediaType>[]) {
+            dartTypes.addAll(_readDarTypesFromContent(mediaType.schema));
+          }
         }
       }
     }
 
-    return SuccessOf((
-      (annotationEndpoint.data.$1, annotationEndpoint.data.$2, result),
-      dartTypes,
-    ));
+    return SuccessOf(((result.data), dartTypes));
   }
 
   ResultOf<InternOpenApiOperation, void> _getInferredEndpoint({
@@ -136,7 +136,7 @@ class const AnnotationAnalyzer({
   }
 
   ResultOf<(List<InternOpenApiParameter>, Set<DartTypeJson>), void>
-  _readParameters({
+  _readInferredParameters({
     required OpenApiFragmentContext context,
     required Element element,
   }) {

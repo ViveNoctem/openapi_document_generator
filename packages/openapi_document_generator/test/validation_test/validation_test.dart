@@ -1,7 +1,8 @@
 import 'package:openapi_document_generator/src/data_classes/open_api_content.dart';
+import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_fragment_context.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
-import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
+import 'package:openapi_document_generator/src/data_classes/openapi_path_item.dart';
 import 'package:test/test.dart';
 
 import 'validation.utils.dart';
@@ -27,8 +28,8 @@ void main() {
     });
 
     test("paths must begin with a forward slash", () {
-      final faulty = <String, Map<HttpMethod, InternOpenApiOperation>>{
-        "temp": {},
+      final faulty = <String, InternOpenapiPathItem>{
+        "temp": InternOpenapiPathItem(),
       };
 
       final openApiSpec = OpenapiDocument(paths: faulty).merge(mvOpenApiSpec);

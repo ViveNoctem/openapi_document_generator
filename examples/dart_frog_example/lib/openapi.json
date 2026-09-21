@@ -10,74 +10,12 @@
         "responses": {
           "202": {
             "description": "Description for accepted"
-          },
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "$ref": "#/components/schemas/Response"
-                }
-              }
-            }
           }
-        },
-        "parameters": [
-          {
-            "name": "temp",
-            "in": "query",
-            "description": "description for the temp field",
-            "required": false,
-            "deprecated": false,
-            "schema": {
-              "type": "object",
-              "$ref": "#/components/schemas/SomethingClass"
-            }
-          }
-        ]
+        }
       }
     }
   },
   "components": {
-    "schemas": {
-      "Response": {
-        "type": "object",
-        "properties": {
-          "shelfBufferOutputContextKey": {
-            "type": "string"
-          }
-        }
-      },
-      "SomethingClass": {
-        "type": "object",
-        "required": [
-          "a",
-          "d"
-        ],
-        "properties": {
-          "a": {
-            "type": "integer"
-          },
-          "d": {
-            "type": "object",
-            "$ref": "#/components/schemas/SomethingClass2"
-          },
-          "b": {
-            "type": "string"
-          }
-        }
-      },
-      "SomethingClass2": {
-        "type": "object",
-        "required": [
-          "c"
-        ],
-        "properties": {
-          "c": {
-            "type": "number"
-          }
-        }
-      }
-    }
+    "schemas": {}
   }
 }
