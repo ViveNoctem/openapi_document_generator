@@ -255,4 +255,31 @@ class const AnnotationReader({
     );
   }
   // endregion
+
+  // region DartShelf
+
+  ({String verb, String route})? readRouteAnnotation(
+    ConstantReader annotation,
+  ) {
+    final verb = annotation.peek("verb");
+
+    if (verb == null || verb.isString == false) {
+      return null;
+    }
+
+    // ignore Route.mount
+    if (verb.stringValue == r"$mount") {
+      return null;
+    }
+
+    final route = annotation.peek("route");
+
+    if (route == null || route.isString == false) {
+      return null;
+    }
+
+    return (verb: verb.stringValue, route: route.stringValue);
+  }
+
+  // endRegion
 }

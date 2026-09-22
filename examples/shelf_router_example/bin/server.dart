@@ -4,24 +4,40 @@ import 'package:openapi_document_annotation/openapi_document_annotation.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-@OpenapiController(shelfRouter: _getRouter)
+@OpenapiController(/*shelfRouter: _getRouter*/)
 class RouterClass {
   static Response rootHandler(Request req) {
     return Response.ok('Hello, World!\n');
   }
 
-  @OpenapiEndpoint(responses: {}, path: "", httpMethod: "get")
-  static Response echoHandler(Request request, String message) {
+  @OpenapiEndpoint(
+    responses: {
+      HttpStatus.accepted: OpenapiResponse(
+        description: 'asdsad',
+        mediaType: 'application/pdf',
+      ),
+    },
+  )
+  static Response echoHandler(
+    Request request,
+    String message,
+    SomethingClass2 d,
+  ) {
     // final message = request.params['message'];
     return Response.ok('$message\n');
   }
+
+  // Router get router => Router()..get("/", rootHandler);
+
+  late final Handler handler = (Router()..get("/", echoHandler)).call;
 }
 
+@Route.connect("")
 Router _getRouter() {
   // Configure routes.
-  final router = Router()
-    ..get('/', RouterClass.rootHandler)
-    ..get('/echo/<message>', RouterClass.echoHandler);
+  final router = Router();
+  router.get('/', RouterClass.rootHandler);
+  router.get('/echo/<message>', RouterClass.echoHandler);
 
   return router;
 }
@@ -39,4 +55,16 @@ void main(List<String> args) async {
   // final port = int.parse(Platform.environment['PORT'] ?? '8080');
   // final server = await serve(handler, ip, port);
   // print('Server listening on port ${server.port}');
+}
+
+class const SomethingClass(
+  final int a,
+  final SomethingClass2 d, {
+  final String b = 'hallo',
+}) {}
+
+class SomethingClass2 {
+  final double c;
+
+  const SomethingClass2(this.c);
 }

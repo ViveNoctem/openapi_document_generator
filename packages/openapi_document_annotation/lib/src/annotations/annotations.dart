@@ -13,9 +13,9 @@ class const OpenapiController({
 const openapiController = OpenapiController();
 
 class const OpenapiEndpoint({
-  required final Map<int, OpenapiResponse> responses,
-  required final String path,
-  required final String httpMethod,
+  final Map<int, OpenapiResponse>? responses,
+  final String? path,
+  final String? httpMethod,
 }) {
   // TODO endpoint route
   // TODO allow for Endpoints without Controller in class
@@ -24,6 +24,7 @@ class const OpenapiEndpoint({
 class const OpenapiResponse({
   // TODO required as long as i can't autogen it from comments
   required final String? description,
+  required final String mediaType,
   final Type? resultType,
 }) {
   // TODO autogen type and statusCode 200 if not supplied

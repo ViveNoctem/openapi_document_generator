@@ -95,7 +95,9 @@ class const AnnotationAnalyzer({
         for (final response in values) {
           for (final mediaType
               in response.content?.values ?? <OpenapiMediaType>[]) {
-            dartTypes.addAll(_readDarTypesFromContent(mediaType.schema));
+            dartTypes.addAll(
+              contentUtil.readDartTypesFromContent(mediaType.schema),
+            );
           }
         }
       }
@@ -186,52 +188,13 @@ class const AnnotationAnalyzer({
 
       final merged = annotationValues.merge(inferredValues);
 
-      componentSchemas.addAll(_readDarTypesFromContent(merged.schema));
+      componentSchemas.addAll(
+        contentUtil.readDartTypesFromContent(merged.schema),
+      );
 
       result.add(merged);
     }
 
     return SuccessOf((result, componentSchemas));
-  }
-
-  Set<DartTypeJson> _readDarTypesFromContent(OpenApiSchemaContent? schema) {
-    final result = <DartTypeJson>{};
-    if (schema case OpenApiSchemaContent(
-      dartType: final schemaType,
-      type: .object,
-    )) {
-      // add dartType of schema to components
-      if (schemaType?.element case Element(
-        library: final library?,
-        name: final name?,
-      )) {
-        result.add((
-          uri: library.firstFragment.source.uri.toString(),
-          className: name,
-        ));
-      }
-
-      // add dartTypes of properties to components
-      if (schema.properties?.values case final values?) {
-        for (final value in values) {
-          if (value case OpenApiSchemaContent(
-            dartType: final propertyType,
-            type: .object,
-          )) {
-            if (propertyType?.element case Element(
-              library: final library?,
-              name: final name?,
-            )) {
-              result.add((
-                uri: library.firstFragment.source.uri.toString(),
-                className: name,
-              ));
-            }
-          }
-        }
-      }
-    }
-
-    return result;
   }
 }

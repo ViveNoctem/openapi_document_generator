@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:openapi_document_generator/src/data_classes/i_document_node.dart';
+import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_operation.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_parameter.dart';
 import 'package:openapi_document_generator/src/result/result_of.dart';
@@ -26,6 +27,21 @@ class const InternOpenapiPathItem({
       _$InternOpenapiPathItemFromJson(json);
   Map<String, dynamic> toJson() => _$InternOpenapiPathItemToJson(this);
 
+  InternOpenapiPathItem.withMethod(
+    HttpMethod method,
+    InternOpenApiOperation operation,
+  ) : this(
+        get: method == .get ? operation : null,
+        put: method == .put ? operation : null,
+        post: method == .post ? operation : null,
+        delete: method == .delete ? operation : null,
+        options: method == .options ? operation : null,
+        head: method == .head ? operation : null,
+        patch: method == .patch ? operation : null,
+        trace: method == .trace ? operation : null,
+        query: method == .query ? operation : null,
+      );
+
   List<InternOpenApiOperation> get allOperations => [
     ?get,
     ?put,
@@ -37,6 +53,21 @@ class const InternOpenapiPathItem({
     ?trace,
     ?query,
   ];
+
+  bool canMerge(InternOpenapiPathItem other) {
+    if ((get != null && other.get != null) &&
+        (put != null && other.put != null) &&
+        (post != null && other.post != null) &&
+        (delete != null && other.delete != null) &&
+        (options != null && other.options != null) &&
+        (head != null && other.head != null) &&
+        (patch != null && other.patch != null) &&
+        (trace != null && other.trace != null) &&
+        (query != null && other.query != null)) {
+      return false;
+    }
+    return true;
+  }
 
   @override
   InternOpenapiPathItem merge(IDocumentNode other) {

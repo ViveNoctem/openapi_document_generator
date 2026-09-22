@@ -7,6 +7,7 @@ import 'package:openapi_document_annotation/openapi_document_annotation.dart';
   responses: {
     HttpStatus.accepted: OpenapiResponse(
       description: 'Description for accepted',
+      mediaType: 'application/json',
     ),
   },
   path: '/',

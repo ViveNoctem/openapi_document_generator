@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_components.dart';
 import 'package:openapi_document_generator/src/data_classes/open_api_content.dart';
+import 'package:openapi_document_generator/src/data_classes/open_api_document.dart';
 
 class const ContentUtils() {
   (OpenApiSchemaContent?, Set<DartType>?) getOpenApiSchemaForType({
@@ -162,5 +163,46 @@ class const ContentUtils() {
     }
 
     return OpenApiComponents(types: typesDone, schemas: schemaContentMap);
+  }
+
+  Set<DartTypeJson> readDartTypesFromContent(OpenApiSchemaContent? schema) {
+    final result = <DartTypeJson>{};
+    if (schema case OpenApiSchemaContent(
+      dartType: final schemaType,
+      type: .object,
+    )) {
+      // add dartType of schema to components
+      if (schemaType?.element case Element(
+        library: final library?,
+        name: final name?,
+      )) {
+        result.add((
+          uri: library.firstFragment.source.uri.toString(),
+          className: name,
+        ));
+      }
+
+      // add dartTypes of properties to components
+      if (schema.properties?.values case final values?) {
+        for (final value in values) {
+          if (value case OpenApiSchemaContent(
+            dartType: final propertyType,
+            type: .object,
+          )) {
+            if (propertyType?.element case Element(
+              library: final library?,
+              name: final name?,
+            )) {
+              result.add((
+                uri: library.firstFragment.source.uri.toString(),
+                className: name,
+              ));
+            }
+          }
+        }
+      }
+    }
+
+    return result;
   }
 }

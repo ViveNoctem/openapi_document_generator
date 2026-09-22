@@ -1,0 +1,49 @@
+{
+  "openapi": "3.2.0",
+  "info": {
+    "title": "title",
+    "version": "version"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "parameters": [
+          {
+            "name": "message",
+            "in": "path",
+            "required": false,
+            "deprecated": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "d",
+            "in": "path",
+            "required": false,
+            "deprecated": false,
+            "schema": {
+              "type": "object",
+              "$ref": "#/components/schemas/SomethingClass2"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SomethingClass2": {
+        "type": "object",
+        "required": [
+          "c"
+        ],
+        "properties": {
+          "c": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

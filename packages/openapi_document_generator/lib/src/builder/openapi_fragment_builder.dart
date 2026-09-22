@@ -100,6 +100,8 @@ class OpenApiFragmentBuilder implements Builder {
       context,
     );
 
+    var resultFragment = annotationFragment;
+
     final extensionFragment = await _doExtensionRun(
       allTypes,
       context,
@@ -107,12 +109,12 @@ class OpenApiFragmentBuilder implements Builder {
       buildStep,
     );
 
-    if (annotationFragment.paths.isEmpty) return;
+    resultFragment = annotationFragment.merge(extensionFragment);
 
-    final result = annotationFragment;
+    if (resultFragment.paths.isEmpty) return;
 
     final outputId = buildStep.inputId.changeExtension('.tmp.openapi.json');
-    await buildStep.writeAsString(outputId, jsonEncode(result));
+    await buildStep.writeAsString(outputId, jsonEncode(resultFragment));
   }
 
   Map<ClassElement?, (List<OpenapiEndpointElement>, InternOpenapiController?)>
@@ -211,7 +213,7 @@ class OpenApiFragmentBuilder implements Builder {
         in allTypes.entries) {
       for (final endpoint in endpoints) {
         final fragmentPart = annotationAnalyzer.readEndpointMethod(
-          element: endpoint,
+          element: endpoint.element,
           context: context,
         );
 
@@ -233,15 +235,7 @@ class OpenApiFragmentBuilder implements Builder {
         final fragmentPathitem = pathEntry.value;
         // TODO bad, but works. Need a way to check if
         // TODO merge would fail to know if schemas are allowed to be added
-        if ((pathItem.get != null && fragmentPathitem.get != null) &&
-            (pathItem.put != null && fragmentPathitem.put != null) &&
-            (pathItem.post != null && fragmentPathitem.post != null) &&
-            (pathItem.delete != null && fragmentPathitem.delete != null) &&
-            (pathItem.options != null && fragmentPathitem.options != null) &&
-            (pathItem.head != null && fragmentPathitem.head != null) &&
-            (pathItem.patch != null && fragmentPathitem.patch != null) &&
-            (pathItem.trace != null && fragmentPathitem.trace != null) &&
-            (pathItem.query != null && fragmentPathitem.query != null)) {
+        if (pathItem.canMerge(fragmentPathitem) == false) {
           continue;
         }
 
